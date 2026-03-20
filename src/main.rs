@@ -54,7 +54,7 @@ fn default_store_dir() -> PathBuf {
     PathBuf::from(home).join(".local/share/fsn/store")
 }
 
-fn clone_store(url: &str, _branch: &str, target: &std::path::Path) -> Result<(), Box<dyn std::error::Error>> {
+fn clone_store(url: &str, branch: &str, target: &std::path::Path) -> Result<(), Box<dyn std::error::Error>> {
     let mut prepare = gix::clone::PrepareFetch::new(
         url,
         target,
@@ -64,12 +64,24 @@ fn clone_store(url: &str, _branch: &str, target: &std::path::Path) -> Result<(),
     )?;
     prepare = prepare.with_remote_name("origin")?;
 
+    // Configure refspec so gix fetches (and checks out) the requested branch.
+    // For the default branch we rely on the remote HEAD; for others we set an
+    // explicit mapping so the working tree lands on the right branch.
+    let branch = branch.to_owned();
+    prepare = prepare.configure_remote(move |remote| {
+        let spec = format!("+refs/heads/{branch}:refs/remotes/origin/{branch}");
+        remote.with_refspecs([spec.as_str()], gix::remote::Direction::Fetch)
+    })?;
+
     let (mut checkout, _outcome) = prepare.fetch_then_checkout(
         gix::progress::Discard,
         &gix::interrupt::IS_INTERRUPTED,
     )?;
 
-    let (_repo, _outcome) = checkout.main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)?;
+    let (_repo, _outcome) = checkout.main_worktree(
+        gix::progress::Discard,
+        &gix::interrupt::IS_INTERRUPTED,
+    )?;
 
     Ok(())
 }
