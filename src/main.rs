@@ -7,8 +7,8 @@
 //   fs-init --target-dir <path>      → clone to a custom directory
 //   fs-init --branch <branch>        → clone a specific branch
 
-use std::path::PathBuf;
 use clap::Parser;
+use std::path::PathBuf;
 
 const DEFAULT_STORE_URL: &str = "https://github.com/FreeSynergy/Store.git";
 
@@ -54,7 +54,11 @@ fn default_store_dir() -> PathBuf {
     PathBuf::from(home).join(".local/share/fsn/store")
 }
 
-fn clone_store(url: &str, branch: &str, target: &std::path::Path) -> Result<(), Box<dyn std::error::Error>> {
+fn clone_store(
+    url: &str,
+    branch: &str,
+    target: &std::path::Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut prepare = gix::clone::PrepareFetch::new(
         url,
         target,
@@ -73,15 +77,11 @@ fn clone_store(url: &str, branch: &str, target: &std::path::Path) -> Result<(), 
         Ok(remote.with_refspecs([spec.as_str()], gix::remote::Direction::Fetch)?)
     });
 
-    let (mut checkout, _outcome) = prepare.fetch_then_checkout(
-        gix::progress::Discard,
-        &gix::interrupt::IS_INTERRUPTED,
-    )?;
+    let (mut checkout, _outcome) =
+        prepare.fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)?;
 
-    let (_repo, _outcome) = checkout.main_worktree(
-        gix::progress::Discard,
-        &gix::interrupt::IS_INTERRUPTED,
-    )?;
+    let (_repo, _outcome) =
+        checkout.main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)?;
 
     Ok(())
 }
