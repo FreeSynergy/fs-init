@@ -37,7 +37,7 @@ fi
 PKGS=()
 for f in $STAGED; do
   dir=$(dirname "$f")
-  while [ "$dir" != "." ] && [ "$dir" != "/" ]; do
+  while true; do
     toml="$dir/Cargo.toml"
     if [ -f "$toml" ]; then
       name=$(grep -m1 '^name' "$toml" | sed 's/name *= *"\(.*\)"/\1/')
@@ -46,6 +46,7 @@ for f in $STAGED; do
       fi
       break
     fi
+    [ "$dir" == "." ] || [ "$dir" == "/" ] && break
     dir=$(dirname "$dir")
   done
 done

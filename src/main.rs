@@ -1,3 +1,4 @@
+#![deny(clippy::all, clippy::pedantic, warnings)]
 // Minimal bootstrap binary: clones the FSN official store repository
 // to a local path so the node can use packages offline.
 //
@@ -12,7 +13,7 @@ use std::path::PathBuf;
 
 const DEFAULT_STORE_URL: &str = "https://github.com/FreeSynergy/Store.git";
 
-/// FreeSynergy Init — bootstraps a node by cloning the official store.
+/// `FreeSynergy` Init — bootstraps a node by cloning the official store.
 #[derive(Parser, Debug)]
 #[command(name = "fs-init", about = "Bootstrap FreeSynergy by cloning the store")]
 struct Args {
