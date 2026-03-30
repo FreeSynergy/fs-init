@@ -1,0 +1,15 @@
+[package]
+name        = "fs-init"
+version     = "0.1.0"
+type        = "program"
+description = "FreeSynergy Init — bootstraps a node by cloning the official store"
+license     = "MIT"
+authors     = ["FreeSynergy.Net"]
+repository  = "https://github.com/FreeSynergy/fs-init"
+
+[capabilities]
+provides = ["init.bootstrap"]
+
+[metadata]
+category = "program"
+tags     = ["init", "bootstrap", "store"]

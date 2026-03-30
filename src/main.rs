@@ -86,3 +86,28 @@ fn clone_store(
 
     Ok(())
 }
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+
+    #[test]
+    fn default_store_dir_uses_home() {
+        env::set_var("HOME", "/tmp/test-home");
+        let dir = default_store_dir();
+        assert_eq!(
+            dir,
+            std::path::PathBuf::from("/tmp/test-home/.local/share/fsn/store")
+        );
+    }
+
+    #[test]
+    fn default_store_dir_fallback_when_no_home() {
+        env::remove_var("HOME");
+        let dir = default_store_dir();
+        assert!(dir.ends_with(".local/share/fsn/store"));
+    }
+}
