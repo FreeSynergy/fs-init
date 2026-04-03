@@ -9,7 +9,7 @@
 //! based on the system capabilities detected by `fs-info`.
 //!
 //! Uses a **State Machine** (wizard) to guide the user through:
-//! `Welcome → Capability → Engine → Bundle → Confirm → Progress → Done`
+//! `Welcome → Capability → StoreLoad → Engine → Bundle → Confirm → Progress → Done`
 //!
 //! All output before the render engine is installed is plain `println!`.
 //! Every user-facing string is a constant defined in `keys.rs` (English fallback).
@@ -20,10 +20,11 @@
 //! - Strategy selection (Gui / Tui / Headless)
 //! - Install wizard (text-based, stdin/stdout)
 //! - Store catalog clone (via `gix`)
-//!
-//! Package installation (Phase 2) and GUI launch (Phase 3+) are not yet wired.
+//! - Bundle install via `fs-store` Pipeline
+//! - Manager startup hint after install
 
 mod capability;
+mod catalog_reader;
 mod error;
 mod keys;
 mod store_clone;
@@ -59,7 +60,8 @@ struct Args {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Args::parse();
 
     println!("{}", keys::INIT_TITLE);
@@ -79,7 +81,7 @@ fn main() {
     }
 }
 
-// ── Clone-only mode (legacy / non-interactive) ────────────────────────────────
+// ── Clone-only mode (non-interactive) ────────────────────────────────────────
 
 fn run_clone_only(args: &Args) {
     let target = args

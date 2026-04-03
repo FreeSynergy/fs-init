@@ -1,6 +1,6 @@
 //! Install wizard (State Machine Pattern).
 //!
-//! Steps: Welcome → Capability → Engine → Bundle → Confirm → Progress → Done
+//! Steps: Welcome → Capability → StoreLoad → Engine → Bundle → Confirm → Progress → Done
 //!
 //! All steps use plain `println!` + stdin because the render engine has not
 //! been installed yet. `WizardStep` is a trait; each step is its own struct.
@@ -11,6 +11,7 @@ pub mod confirm;
 pub mod done;
 pub mod engine;
 pub mod progress;
+pub mod store_load;
 pub mod welcome;
 
 use std::path::PathBuf;
@@ -23,18 +24,18 @@ use crate::error::FsInitError;
 /// A bundle the user can choose to install.
 #[derive(Debug, Clone)]
 pub struct BundleChoice {
-    pub id: &'static str,
-    pub name: &'static str,
-    pub description: &'static str,
+    pub id: String,
+    pub name: String,
+    pub description: String,
     pub requires_display: bool,
 }
 
 /// A render engine the user can choose.
 #[derive(Debug, Clone)]
 pub struct EngineChoice {
-    pub id: &'static str,
-    pub name: &'static str,
-    pub description: &'static str,
+    pub id: String,
+    pub name: String,
+    pub description: String,
     pub requires_display: bool,
 }
 
@@ -58,63 +59,68 @@ impl InstallTarget {
     }
 }
 
-// ── Known bundles (Phase 1 hardcoded — Phase 2 reads from Store catalog) ─────
+// ── Built-in bundle defaults (used when store catalog is not yet available) ───
 
-pub const BUNDLES: &[BundleChoice] = &[
-    BundleChoice {
-        id: "minimal",
-        name: "FreeSynergy Minimal",
-        description: "Node + Registry + SQLite. For embedded systems and CI.",
-        requires_display: false,
-    },
-    BundleChoice {
-        id: "server",
-        name: "FreeSynergy Server",
-        description: "Minimal + Auth (Kanidm) + Inventory + Session. Full server stack.",
-        requires_display: false,
-    },
-    BundleChoice {
-        id: "workstation",
-        name: "FreeSynergy Workstation",
-        description: "Server + Desktop + Managers + Apps. Daily-driver desktop.",
-        requires_display: true,
-    },
-    BundleChoice {
-        id: "developer",
-        name: "FreeSynergy Developer",
-        description: "Workstation + Forgejo + extended developer tools.",
-        requires_display: true,
-    },
-];
+pub fn default_bundles() -> Vec<BundleChoice> {
+    vec![
+        BundleChoice {
+            id: "freeSynergy.bundle.minimal".to_string(),
+            name: "FreeSynergy Minimal".to_string(),
+            description: "Node + Registry + SQLite. For embedded systems and CI.".to_string(),
+            requires_display: false,
+        },
+        BundleChoice {
+            id: "freeSynergy.bundle.server".to_string(),
+            name: "FreeSynergy Server".to_string(),
+            description: "Minimal + Auth (Kanidm) + Inventory + Session. Full server stack."
+                .to_string(),
+            requires_display: false,
+        },
+        BundleChoice {
+            id: "freeSynergy.bundle.workstation".to_string(),
+            name: "FreeSynergy Workstation".to_string(),
+            description: "Server + Desktop + Managers + Apps. Daily-driver desktop.".to_string(),
+            requires_display: true,
+        },
+        BundleChoice {
+            id: "freeSynergy.bundle.developer".to_string(),
+            name: "FreeSynergy Developer".to_string(),
+            description: "Workstation + Forgejo + extended developer tools.".to_string(),
+            requires_display: true,
+        },
+    ]
+}
 
-// ── Known engines (Phase 1 hardcoded) ────────────────────────────────────────
+// ── Built-in engine defaults ──────────────────────────────────────────────────
 
-pub const ENGINES: &[EngineChoice] = &[
-    EngineChoice {
-        id: "iced",
-        name: "iced (libcosmic)",
-        description: "Native GPU-accelerated GUI. Recommended for desktops.",
-        requires_display: true,
-    },
-    EngineChoice {
-        id: "bevy",
-        name: "Bevy",
-        description: "3D-capable game-engine renderer. Experimental.",
-        requires_display: true,
-    },
-    EngineChoice {
-        id: "tui",
-        name: "TUI (ratatui)",
-        description: "Terminal UI. Works without a display server.",
-        requires_display: false,
-    },
-    EngineChoice {
-        id: "none",
-        name: "No UI (API + CLI only)",
-        description: "Headless operation via gRPC / REST only.",
-        requires_display: false,
-    },
-];
+pub fn default_engines() -> Vec<EngineChoice> {
+    vec![
+        EngineChoice {
+            id: "iced".to_string(),
+            name: "iced (libcosmic)".to_string(),
+            description: "Native GPU-accelerated GUI. Recommended for desktops.".to_string(),
+            requires_display: true,
+        },
+        EngineChoice {
+            id: "bevy".to_string(),
+            name: "Bevy".to_string(),
+            description: "3D-capable game-engine renderer. Experimental.".to_string(),
+            requires_display: true,
+        },
+        EngineChoice {
+            id: "tui".to_string(),
+            name: "TUI (ratatui)".to_string(),
+            description: "Terminal UI. Works without a display server.".to_string(),
+            requires_display: false,
+        },
+        EngineChoice {
+            id: "none".to_string(),
+            name: "No UI (API + CLI only)".to_string(),
+            description: "Headless operation via gRPC / REST only.".to_string(),
+            requires_display: false,
+        },
+    ]
+}
 
 // ── Wizard state ──────────────────────────────────────────────────────────────
 
@@ -125,6 +131,8 @@ pub struct WizardState {
     pub selected_bundle: Option<BundleChoice>,
     pub selected_engine: Option<EngineChoice>,
     pub install_target: InstallTarget,
+    /// Path to the cloned store catalog (set by StoreLoadStep).
+    pub store_dir: PathBuf,
 }
 
 /// The final result handed back to the strategy after the wizard completes.
@@ -173,10 +181,12 @@ impl WizardMachine {
             selected_bundle: None,
             selected_engine: None,
             install_target,
+            store_dir: crate::store_clone::default_store_dir(),
         };
         let steps: Vec<Box<dyn WizardStep>> = vec![
             Box::new(welcome::WelcomeStep),
             Box::new(capability_step::CapabilityStep),
+            Box::new(store_load::StoreLoadStep),
             Box::new(engine::EngineStep),
             Box::new(bundle::BundleStep),
             Box::new(confirm::ConfirmStep),
@@ -234,19 +244,18 @@ fn print_step_header(current: usize, total: usize, title: &str) {
 }
 
 fn build_result(state: &WizardState) -> WizardResult {
-    let store_path = crate::store_clone::default_store_dir();
     let bundle_id = state
         .selected_bundle
         .as_ref()
-        .map_or("none", |b| b.id)
+        .map_or("none", |b| b.id.as_str())
         .to_owned();
     let engine_id = state
         .selected_engine
         .as_ref()
-        .map_or("none", |e| e.id)
+        .map_or("none", |e| e.id.as_str())
         .to_owned();
     WizardResult {
-        store_path,
+        store_path: state.store_dir.clone(),
         bundle_id,
         engine_id,
         install_target: state.install_target,

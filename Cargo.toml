@@ -9,6 +9,11 @@ name = "fs-init"
 path = "src/main.rs"
 
 [dependencies]
-fs-info = { path = "../fs-info" }
+fs-info  = { path = "../fs-info" }
+fs-store = { path = "../fs-store/crates/fs-store" }
 gix = { version = "0.80", default-features = false, features = ["blocking-http-transport-reqwest-rust-tls", "worktree-mutation"] }
-clap = { version = "4", features = ["derive"] }
+clap    = { version = "4", features = ["derive"] }
+tokio   = { version = "1", features = ["rt", "rt-multi-thread", "macros", "process"] }
+serde   = { version = "1", features = ["derive"] }
+toml    = { version = "1" }
+tracing = { version = "0.1" }

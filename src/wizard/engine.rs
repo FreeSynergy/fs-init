@@ -1,9 +1,9 @@
-//! Wizard step 3 — Render engine selection.
+//! Wizard step 4 — Render engine selection.
 
 use crate::capability::BootstrapMode;
 use crate::error::FsInitError;
 use crate::keys;
-use crate::wizard::{prompt, EngineChoice, StepResult, WizardState, WizardStep, ENGINES};
+use crate::wizard::{default_engines, prompt, EngineChoice, StepResult, WizardState, WizardStep};
 
 pub struct EngineStep;
 
@@ -54,14 +54,14 @@ impl WizardStep for EngineStep {
     }
 }
 
-fn available_engines(mode: BootstrapMode) -> Vec<&'static EngineChoice> {
-    ENGINES
-        .iter()
+fn available_engines(mode: BootstrapMode) -> Vec<EngineChoice> {
+    default_engines()
+        .into_iter()
         .filter(|e| mode == BootstrapMode::Gui || !e.requires_display)
         .collect()
 }
 
-fn default_engine_idx(mode: BootstrapMode, available: &[&EngineChoice]) -> Option<usize> {
+fn default_engine_idx(mode: BootstrapMode, available: &[EngineChoice]) -> Option<usize> {
     let preferred = match mode {
         BootstrapMode::Gui => "iced",
         BootstrapMode::Tui => "tui",

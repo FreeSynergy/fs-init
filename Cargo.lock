@@ -657,7 +657,28 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "fs-info",
+ "fs-store",
  "gix",
+ "serde",
+ "tokio",
+ "toml",
+ "tracing",
+]
+
+[[package]]
+name = "fs-store"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "toml",
+ "tracing",
 ]
 
 [[package]]
@@ -2715,6 +2736,8 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "rustls-platform-verifier",
+ "serde",
+ "serde_json",
  "sync_wrapper",
  "tokio",
  "tokio-rustls",

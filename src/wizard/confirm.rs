@@ -16,10 +16,16 @@ impl WizardStep for ConfirmStep {
         println!("  The following will be installed:");
         println!();
 
-        let bundle_name = state.selected_bundle.as_ref().map_or("none", |b| b.name);
+        let bundle_name = state
+            .selected_bundle
+            .as_ref()
+            .map_or("none", |b| b.name.as_str());
         println!("{}{}", keys::INIT_STEP_CONFIRM_BUNDLE, bundle_name);
 
-        let engine_name = state.selected_engine.as_ref().map_or("none", |e| e.name);
+        let engine_name = state
+            .selected_engine
+            .as_ref()
+            .map_or("none", |e| e.name.as_str());
         println!("{}{}", keys::INIT_STEP_CONFIRM_ENGINE, engine_name);
 
         println!(

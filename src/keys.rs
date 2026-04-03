@@ -49,6 +49,22 @@ pub const INIT_STEP_WELCOME_BODY: &str =
 /// FTL key: `init-step-capability-title`
 pub const INIT_STEP_CAPABILITY_TITLE: &str = "System Capabilities";
 
+/// FTL key: `init-step-store-load-title`
+pub const INIT_STEP_STORE_LOAD_TITLE: &str = "Store Catalog";
+
+/// FTL key: `init-step-store-load-cloning`
+pub const INIT_STEP_STORE_LOAD_CLONING: &str = "  Cloning store catalog…";
+
+/// FTL key: `init-step-store-load-exists`
+pub const INIT_STEP_STORE_LOAD_EXISTS: &str = "  Store already present — skipping clone.";
+
+/// FTL key: `init-step-store-load-done`
+pub const INIT_STEP_STORE_LOAD_DONE: &str = "  Store ready.";
+
+/// FTL key: `init-step-store-load-failed`
+pub const INIT_STEP_STORE_LOAD_FAILED: &str =
+    "  Warning: could not clone store. Using built-in bundle defaults.";
+
 /// FTL key: `init-step-engine-title`
 pub const INIT_STEP_ENGINE_TITLE: &str = "Render Engine";
 
@@ -61,6 +77,12 @@ pub const INIT_STEP_BUNDLE_TITLE: &str = "Bundle Selection";
 
 /// FTL key: `init-step-bundle-prompt`
 pub const INIT_STEP_BUNDLE_PROMPT: &str = "Choose a bundle to install:";
+
+/// FTL key: `init-step-bundle-loading`
+pub const INIT_STEP_BUNDLE_LOADING: &str = "  Loading bundles from store catalog…";
+
+/// FTL key: `init-step-bundle-using-defaults`
+pub const INIT_STEP_BUNDLE_USING_DEFAULTS: &str = "  (using built-in bundle defaults)";
 
 /// FTL key: `init-step-confirm-title`
 pub const INIT_STEP_CONFIRM_TITLE: &str = "Confirm Installation";
@@ -80,6 +102,37 @@ pub const INIT_STEP_CONFIRM_QUESTION: &str = "Proceed? [y/N]: ";
 /// FTL key: `init-step-progress-title`
 pub const INIT_STEP_PROGRESS_TITLE: &str = "Installing";
 
+/// FTL key: `init-step-progress-step-started`
+pub const INIT_STEP_PROGRESS_STEP_STARTED: &str = "    [";
+
+/// FTL key: `init-step-progress-step-ok`
+pub const INIT_STEP_PROGRESS_STEP_OK: &str = " done";
+
+/// FTL key: `init-step-progress-step-skipped`
+pub const INIT_STEP_PROGRESS_STEP_SKIPPED: &str = " skipped";
+
+/// FTL key: `init-step-progress-step-failed`
+pub const INIT_STEP_PROGRESS_STEP_FAILED: &str = " FAILED";
+
+/// FTL key: `init-step-progress-installing`
+pub const INIT_STEP_PROGRESS_INSTALLING: &str = "  Installing: ";
+
+/// FTL key: `init-step-progress-install-ok`
+pub const INIT_STEP_PROGRESS_INSTALL_OK: &str = "  All packages installed successfully.";
+
+/// FTL key: `init-step-progress-install-failed`
+pub const INIT_STEP_PROGRESS_INSTALL_FAILED: &str = "  Installation failed: ";
+
+/// FTL key: `init-step-progress-no-bundle`
+pub const INIT_STEP_PROGRESS_NO_BUNDLE: &str =
+    "  No bundle selected — skipping package installation.";
+
+/// FTL key: `init-step-progress-adapter-note`
+pub const INIT_STEP_PROGRESS_ADAPTER_NOTE: &str =
+    "  (adapter packages are installed automatically)";
+
+// ── Legacy keys kept for clone-only mode ─────────────────────────────────────
+
 /// FTL key: `init-step-progress-cloning-store`
 pub const INIT_STEP_PROGRESS_CLONING_STORE: &str = "  Cloning store catalog…";
 
@@ -89,19 +142,25 @@ pub const INIT_STEP_PROGRESS_CLONE_OK: &str = "  Store ready.";
 /// FTL key: `init-step-progress-clone-exists`
 pub const INIT_STEP_PROGRESS_CLONE_EXISTS: &str = "  Store already present — skipping clone.";
 
-/// FTL key: `init-step-progress-install-pending`
-pub const INIT_STEP_PROGRESS_INSTALL_PENDING: &str =
-    "  Package install pipeline not yet available (Phase 2).";
-
 /// FTL key: `init-step-done-title`
 pub const INIT_STEP_DONE_TITLE: &str = "Done";
 
 /// FTL key: `init-step-done-body`
-pub const INIT_STEP_DONE_BODY: &str = "FreeSynergy has been bootstrapped.\n\
-     The store is available locally. Start the Store service to continue.";
+pub const INIT_STEP_DONE_BODY: &str = "FreeSynergy has been bootstrapped successfully.";
 
 /// FTL key: `init-step-done-store-path`
 pub const INIT_STEP_DONE_STORE_PATH: &str = "  Store path:      ";
+
+/// FTL key: `init-step-done-next-steps`
+pub const INIT_STEP_DONE_NEXT_STEPS: &str = "Next steps:";
+
+/// FTL key: `init-step-done-manager-hint`
+pub const INIT_STEP_DONE_MANAGER_HINT: &str =
+    "  1. Run 'fs-manager start' to configure your installed services.";
+
+/// FTL key: `init-step-done-store-hint`
+pub const INIT_STEP_DONE_STORE_HINT: &str =
+    "  2. Open the Store to browse and install additional packages.";
 
 // ── Target ────────────────────────────────────────────────────────────────────
 

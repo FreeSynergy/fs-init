@@ -11,6 +11,8 @@ pub enum FsInitError {
     Io(std::io::Error),
     /// User aborted the wizard.
     Aborted,
+    /// Install pipeline failed.
+    Install(String),
 }
 
 impl fmt::Display for FsInitError {
@@ -19,6 +21,7 @@ impl fmt::Display for FsInitError {
             FsInitError::StoreClone(msg) => write!(f, "Store clone failed: {msg}"),
             FsInitError::Io(e) => write!(f, "I/O error: {e}"),
             FsInitError::Aborted => write!(f, "Aborted by user"),
+            FsInitError::Install(msg) => write!(f, "Install failed: {msg}"),
         }
     }
 }
